@@ -1,0 +1,184 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- TABELA DO PAINEL ADMINISTRATIVO ---
+model Admin {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String   // Senha criptografada do admin
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// --- TABELA DOS MEMBROS DA COMUNIDADE / SITE ---
+model CommunityUser {
+  id           String   @id @default(uuid())
+  username     String   @unique
+  password     String   // Senha criptografada do membro
+  name         String
+  email        String?  @unique
+  avatar       String?  @default("https://www.habbo.com.br/habbo-imaging/avatarimage?user=BletRed&headonly=1&size=m")
+  motto        String?  @default("Integrante da comunidade")
+  status       String   @default("Offline")
+  role         String   @default("MEMBRO") // <-- CAMPO NOVO
+  postsCount   Int      @default(0)
+  followers    Int      @default(0)
+  following    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// --- DEMAIS TABELAS DO SITE ---
+model Highlight {
+  id        String   @id @default(uuid())
+  title     String
+  subtitle  String
+  iconName  String
+  imageUrl  String?
+  link      String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model News {
+  id           String        @id @default(uuid())
+  title        String
+  category     String
+  content      String
+  imageUrl     String?
+  authorName   String        @default("BletRed")
+  authorAvatar String        @default("https://www.habbo.com.br/habbo-imaging/avatarimage?user=BletRed&headonly=1&size=m")
+  likes        Int           @default(0)
+  comments     Int           @default(0)
+  shares       Int           @default(0)
+  isNews       Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  commentsList NewsComment[]
+}
+
+// Comentários das notícias (usado pelo ranking em /api/rankings)
+model NewsComment {
+  id         String   @id @default(uuid())
+  newsId     String
+  news       News     @relation(fields: [newsId], references: [id], onDelete: Cascade)
+  authorName String
+  avatar     String?
+  content    String
+  createdAt  DateTime @default(now())
+
+  @@index([newsId])
+  @@index([authorName, createdAt])
+}
+
+model GalleryItem {
+  id        String   @id @default(uuid())
+  label     String?
+  style     String?  @default("")
+  imageUrl  String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Ranking {
+  id        String   @id @default(uuid())
+  name      String
+  tag       String   @default("Membro")
+  points    Int      @default(0)
+  period    String   @default("diario")
+  position  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Emblem {
+  id        String   @id @default(uuid())
+  title     String
+  desc      String   @default("Conquistado")
+  iconName  String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model RecentPost {
+  id        String   @id @default(uuid())
+  name      String
+  timeText  String   @default("Agora")
+  text      String
+  likes     Int      @default(0)
+  comments  Int      @default(0)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Server {
+  id          String   @id @default(uuid())
+  title       String
+  subtitle    String
+  online      String   @default("0 online")
+  members     String   @default("0 membros")
+  iconName    String
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model LatestEvent {
+  id        String   @id @default(uuid())
+  title     String
+  desc      String
+  day       String
+  month     String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model StoreProduct {
+  id        String   @id @default(uuid())
+  title     String
+  price     String
+  iconName  String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Announcement {
+  id        String   @id @default(uuid())
+  title     String
+  content   String
+  author    String   @default("Equipe Superior")
+  createdAt DateTime @default(now())
+}
+
+model Sponsor {
+  id        String   @id @default(cuid())
+  name      String
+  imageUrl  String
+  linkUrl   String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  imageUrl    String
+  dateText    String   // Ex: "Hoje às 20:00 BRT" ou "15 de Outubro"
+  linkUrl     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
